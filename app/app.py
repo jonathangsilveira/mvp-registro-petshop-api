@@ -26,17 +26,12 @@ def adicionar_servico(form: NovoServicoSchema):
     Adicionar um novo serviço na base de dados.
     """
     try:
-        servico = ServicoEntity(titulo=form.titulo, preco_unitario=form.preco_unitario, 
-                               eh_ativo=form.eh_ativo)
-        session = Session()
-        session.add(servico)
-        session.commit()
-        session.close()
+        controller_servico.adicionar_servico(schema=form)
         
         return {}, 200
     except IntegrityError as cause:
         erro = ErroSchema()
-        erro.mensagem = f'Serviço "{servico.titulo}" já cadastrado!'
+        erro.mensagem = f'Serviço "{form.titulo}" já cadastrado!'
         print(f'{erro.mensagem}: {cause}')
         return apresentar_erro(erro), 409
     except Exception as cause:
@@ -48,19 +43,8 @@ def adicionar_servico(form: NovoServicoSchema):
 @app.get('/api/servico', tags=[servico_ativo_tag], 
          responses={200: ServicosAtivosViewSchema, 400: ErroSchema})
 def listar_servicos_ativos():
-    """
-    Lista os serviços com status ativo na base de dados.
-    """
     try:
-        session = Session()
-        servicos = session.query(ServicoEntity).filter(ServicoEntity.eh_ativo == True).all()
-        servicos_ativos: list[ServicoAtivoSchema] = []
-        for servico in servicos:
-            servico_ativo = ServicoAtivoSchema(id=servico.id, titulo=servico.titulo, 
-                                               preco_unitario=servico.preco_unitario)
-            servicos_ativos.append(servico_ativo)
-        
-        session.close()
+        servicos_ativos = controller_servico.recuperar_servicos_ativos()
         return apresentar_servicos_ativos(servicos_ativos), 200
     except Exception as cause:
         erro = ErroSchema()
