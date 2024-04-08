@@ -20,7 +20,7 @@ def documentation():
     return redirect('/openapi/swagger')
 
 @app.post('/api/servico', tags=[servico_tag], 
-          responses={400: ErroSchema, 409: ErroSchema})
+          responses={200: {}, 400: ErroSchema, 409: ErroSchema})
 def adicionar_servico(form: NovoServicoSchema):
     """
     Adicionar um novo serviço na base de dados.
