@@ -51,3 +51,16 @@ def listar_servicos_ativos():
         erro.mensagem = 'Erro ao listar serviços ativos!'
         print(f'{erro.mensagem}: {cause}')
         return apresentar_erro(erro), 400
+    
+@app.delete('/api/agendamento_servico', tags=[], 
+            responses={200: {}, 400: ErroSchema})
+def excluir_agendamento(form: ExcluirAgendamentoServicoSchema):
+    """
+    """
+    try:
+        controller_agendamento.excluir_agendamento_servico(form.id)
+        return {}, 200
+    except Exception as erro:
+        print(erro)
+        schema = ErroSchema(mensagem=f'Erro ao excluir agendamento de serviço!')
+        return apresentar_erro(schema), 400
