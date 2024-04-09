@@ -9,7 +9,7 @@ from app.schema.agendamento_servicos import NovoAgendamentoServicoSchema, Altera
 
 from .excecoes import AgendamentoNaoEncontradoException, ExclusaoAgendamentoForaDoHorarioPermitidoException
 
-DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+from .extensoes_data import para_data_hora_servidor, alterar_data_hora_inicio, alterar_data_hora_fim, formatar_data_hora_servidor, para_data_servidor
 
 PRAZO_EXCLUSAO_EM_HORAS = 4
 
@@ -23,7 +23,7 @@ class AgendamentoServicoController:
         Agenda um serviço para um cliente e seu pet.
         """
         session = Session()
-        data_agendamento = datetime.strptime(schema.data_agendamento, DATETIME_FORMAT)
+        data_agendamento = para_data_hora_servidor(schema.data_agendamento)
         agendamento = AgendamentoServicoEntity(data_agendamento=data_agendamento, nome_cliente=schema.nome_cliente, 
                                                nome_pet=schema.nome_pet, valor_servico=schema.valor_servico, 
                                                servico_id=schema.servico_id, eh_cancelado=schema.cancelado)
@@ -36,7 +36,7 @@ class AgendamentoServicoController:
         Altera um registro de agendamento de serviço.
         """
         session = Session()
-        data_agendamento = datetime.strftime(schema.data_agendamento, DATETIME_FORMAT)
+        data_agendamento = para_data_hora_servidor(schema.data_agendamento)
         agendamento: Optional[AgendamentoServicoEntity] = session.get(AgendamentoServicoEntity, schema.id)
         if not agendamento:
             raise AgendamentoNaoEncontradoException('Agendamento não encontrado!')
@@ -65,32 +65,27 @@ class AgendamentoServicoController:
         session.commit()
         session.close()
 
-    def buscar_agendamentos_por_data(self, data_agendamento: str) -> list[AgendamentoServicoSchema]:
+    def buscar_agendamentos_por_data(self, data_agendamento_inicio: str, 
+                                     data_agendamento_fim: str) -> list[AgendamentoServicoSchema]:
         """
         Busca os agendamentos dado argumentos de pesquisa.
 
         Arguments:
-            data_agendamento: Data de agendamento.
+            data_agendamento_inicio: Data de agendamento início.
+            data_agendamento_fim: Data de agendamento.
         """
-        pass
 
-    def buscar_agendamentos_por_cliente(self, nome_cliente: str) -> list[AgendamentoServicoSchema]:
-        """
-        Busca os agendamentos dado argumentos de pesquisa.
-
-        Arguments:
-            nome_cliente: Nome do cliente.
-        """
-        pass
-
-    def buscar_agendamentos_por_pet(self, nome_pet: str) -> list[AgendamentoServicoSchema]:
-        """
-        Busca os agendamentos dado argumentos de pesquisa.
-
-        Arguments:
-            nome_pet: Nome do pet.
-        """
-        pass
+        data_hora_agendamento_inicio = alterar_data_hora_inicio(para_data_servidor(data_agendamento_inicio))
+        data_hora_agendamento_fim = alterar_data_hora_fim(para_data_servidor(data_agendamento_fim))
+        session = Session()
+        agendamentos = session.query(AgendamentoServicoEntity). \
+            filter(AgendamentoServicoEntity.data_agendamento >= data_hora_agendamento_inicio, 
+                   AgendamentoServicoEntity.data_agendamento <= data_hora_agendamento_fim). \
+            all()
+        
+        schemas = [self.__mapear_entity_para_schema__(agendamento) for agendamento in agendamentos]
+        session.close()
+        return schemas
 
     def buscar_agendamento_por_id(self, id: int) -> AgendamentoServicoSchema:
         """
@@ -101,13 +96,8 @@ class AgendamentoServicoController:
         if not agendamento:
             session.close()
             raise AgendamentoNaoEncontradoException('Agendamento não encontrado!')
-        data_agendamento = datetime.strftime(agendamento.data_agendamento, DATETIME_FORMAT)
-        data_inclusao = datetime.strftime(agendamento.data_inclusao, DATETIME_FORMAT)
-        schema = AgendamentoServicoSchema(id=agendamento.id, data_agendamento=data_agendamento, 
-                                          nome_cliente=agendamento.nome_cliente, nome_pet=agendamento.nome_pet, 
-                                          valor_servico=agendamento.valor_servico, servico_id=agendamento.servico_id, 
-                                          servico_titulo='', cancelado=agendamento.eh_cancelado, 
-                                          data_inclusao=data_inclusao)
+        
+        schema = self.__mapear_entity_para_schema__(agendamento)
         session.close()
         return schema
     
@@ -119,4 +109,15 @@ class AgendamentoServicoController:
         duracao_em_seg = duracao.total_seconds()
         duracao_em_horas = divmod(duracao_em_seg, 3600)[0]
         return duracao_em_horas < PRAZO_EXCLUSAO_EM_HORAS
-
+    
+    def __mapear_entity_para_schema__(self, agendamento: AgendamentoServicoEntity) -> AgendamentoServicoSchema:
+        """
+        Mapeia instancia de 'AgendamentoServicoEntity' para 'AgendamentoServicoSchema'.
+        """
+        data_agendamento = formatar_data_hora_servidor(agendamento.data_agendamento)
+        data_inclusao = formatar_data_hora_servidor(agendamento.data_inclusao)
+        return AgendamentoServicoSchema(id=agendamento.id, data_agendamento=data_agendamento, 
+                                        nome_cliente=agendamento.nome_cliente, nome_pet=agendamento.nome_pet, 
+                                        valor_servico=agendamento.valor_servico, servico_id=agendamento.servico_id, 
+                                        servico_titulo='', cancelado=agendamento.eh_cancelado, 
+                                        data_inclusao=data_inclusao)

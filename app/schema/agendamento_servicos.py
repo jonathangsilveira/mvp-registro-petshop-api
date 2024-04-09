@@ -44,6 +44,13 @@ class AgendamentoServicoPorIdSchema(BaseModel):
     """
     id: int
 
+class BuscaAgendaPorDataSchema(BaseModel):
+    """
+    Define contrato para busca de agenda por data.
+    """
+    data_inicio: str = '2024-04-22'
+    data_fim: str = '2024-04-26'
+
 def apresenta_agendamento(schema: AgendamentoServicoSchema) -> dict[str, any]:
     return {
         "id": schema.id,
