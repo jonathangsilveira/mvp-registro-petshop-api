@@ -52,6 +52,25 @@ def listar_servicos_ativos():
         print(f'{erro.mensagem}: {cause}')
         return apresentar_erro(erro), 400
     
+@app.post('/api/agendamento_servico/novo', tags=[], 
+          responses={200: {}, 400: ErroSchema, 409: ErroSchema})
+def novo_agendamento(form: NovoAgendamentoServicoSchema):
+    """
+    Registra um novo agendamento de serviço.
+    """
+    try:
+        controller_agendamento.agendar_servico(form)
+        return {}, 200
+    except IntegrityError:
+        mensagem_erro = f'Já existe um agendamento para esta data e horário: {form.data_agendamento}'
+        schema = ErroSchema(mensagem=mensagem_erro)
+        return apresentar_erro(schema), 409
+    except Exception as erro:
+        print(erro)
+        mensagem_erro = f'Erro ao agendar serviço para a data {form.data_agendamento}!'
+        schema = ErroSchema(mensagem=mensagem_erro)
+        return apresentar_erro(schema), 400
+    
 @app.delete('/api/agendamento_servico', tags=[], 
             responses={200: {}, 400: ErroSchema})
 def excluir_agendamento(form: ExcluirAgendamentoServicoSchema):

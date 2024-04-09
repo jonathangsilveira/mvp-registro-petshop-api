@@ -9,14 +9,14 @@ from app.schema.agendamento_servicos import NovoAgendamentoServicoSchema, Altera
 
 from .business_exceptions import AgendamentoNaoEncontradoException
 
-DATETIME_FORMAT = '%d/%m/%Y %H:%M:%S'
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 class AgendamentoServicoController:
     """
     Acessa as entidades para fornecer os dados para as rotas de agendamento de serviços.
     """
 
-    def agendar_servico(schema: NovoAgendamentoServicoSchema) -> None:
+    def agendar_servico(self, schema: NovoAgendamentoServicoSchema) -> None:
         """
         Agenda um serviço para um cliente e seu pet.
         """
@@ -29,7 +29,7 @@ class AgendamentoServicoController:
         session.commit()
         session.close() 
 
-    def alterar_agendamento_servico(schema: AlterarAgendamentoServicoSchema) -> None:
+    def alterar_agendamento_servico(self, schema: AlterarAgendamentoServicoSchema) -> None:
         """
         Altera um registro de agendamento de serviço.
         """
@@ -47,7 +47,7 @@ class AgendamentoServicoController:
         session.commit()
         session.close()
 
-    def excluir_agendamento_servico(id: int) -> None:
+    def excluir_agendamento_servico(self, id: int) -> None:
         """
         """
         session = Session()
@@ -58,7 +58,7 @@ class AgendamentoServicoController:
         session.commit()
         session.close()
 
-    def buscar_agendamentos_por_data(data_agendamento: str) -> list[AgendamentoServicoSchema]:
+    def buscar_agendamentos_por_data(self, data_agendamento: str) -> list[AgendamentoServicoSchema]:
         """
         Busca os agendamentos dado argumentos de pesquisa.
 
@@ -67,7 +67,7 @@ class AgendamentoServicoController:
         """
         pass
 
-    def buscar_agendamentos_por_cliente(nome_cliente: str) -> list[AgendamentoServicoSchema]:
+    def buscar_agendamentos_por_cliente(self, nome_cliente: str) -> list[AgendamentoServicoSchema]:
         """
         Busca os agendamentos dado argumentos de pesquisa.
 
@@ -76,7 +76,7 @@ class AgendamentoServicoController:
         """
         pass
 
-    def buscar_agendamentos_por_pet(nome_pet: str) -> list[AgendamentoServicoSchema]:
+    def buscar_agendamentos_por_pet(self, nome_pet: str) -> list[AgendamentoServicoSchema]:
         """
         Busca os agendamentos dado argumentos de pesquisa.
 
@@ -85,7 +85,7 @@ class AgendamentoServicoController:
         """
         pass
 
-    def buscar_agendamento_por_id(id: int) -> Optional[AgendamentoServicoSchema]:
+    def buscar_agendamento_por_id(self, id: int) -> Optional[AgendamentoServicoSchema]:
         """
         Retorna o agendamento pelo seu id ou None caso não encontre.
         """
