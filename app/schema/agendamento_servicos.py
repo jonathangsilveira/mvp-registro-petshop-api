@@ -38,7 +38,7 @@ class AgendamentoServicoSchema(BaseModel):
     cancelado: bool
     data_inclusao: str
 
-class ExcluirAgendamentoServicoSchema(BaseModel):
+class AgendamentoServicoPorIdSchema(BaseModel):
     """
     Define contrato para exclusão do agendamento de serviço.
     """

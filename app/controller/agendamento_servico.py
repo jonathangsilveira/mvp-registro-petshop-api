@@ -7,9 +7,11 @@ from app.entity import ServicoEntity, AgendamentoServicoEntity
 
 from app.schema.agendamento_servicos import NovoAgendamentoServicoSchema, AlterarAgendamentoServicoSchema, AgendamentoServicoSchema
 
-from .business_exceptions import AgendamentoNaoEncontradoException
+from .excecoes import AgendamentoNaoEncontradoException, ExclusaoAgendamentoForaDoHorarioPermitidoException
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+PRAZO_EXCLUSAO_EM_HORAS = 4
 
 class AgendamentoServicoController:
     """
@@ -49,11 +51,16 @@ class AgendamentoServicoController:
 
     def excluir_agendamento_servico(self, id: int) -> None:
         """
+        Exclui o agendamento de serviço da base de dados
         """
         session = Session()
         agendamento: Optional[AgendamentoServicoEntity] = session.get(AgendamentoServicoEntity, id)
         if not agendamento:
+            session.close()
             raise AgendamentoNaoEncontradoException('Agendamento não encontrado!')
+        if self.__eh_exclusao_fora_do_prazo__(agendamento.data_agendamento): 
+            session.close()
+            raise ExclusaoAgendamentoForaDoHorarioPermitidoException('Não é possível excluir agendamento!')
         session.delete(agendamento)
         session.commit()
         session.close()
@@ -85,24 +92,31 @@ class AgendamentoServicoController:
         """
         pass
 
-    def buscar_agendamento_por_id(self, id: int) -> Optional[AgendamentoServicoSchema]:
+    def buscar_agendamento_por_id(self, id: int) -> AgendamentoServicoSchema:
         """
         Retorna o agendamento pelo seu id ou None caso não encontre.
         """
-        try:
-            session = Session()
-            agendamento: Optional[AgendamentoServicoEntity] = session.get(AgendamentoServicoEntity, id)
-            if not agendamento:
-                raise AgendamentoNaoEncontradoException('Agendamento não encontrado!')
-            data_agendamento = datetime.strftime(agendamento.data_agendamento, DATETIME_FORMAT)
-            data_inclusao = datetime.strftime(agendamento.data_inclusao, DATETIME_FORMAT)
-            schema = AgendamentoServicoSchema(id=agendamento.id, data_agendamento=data_agendamento, 
-                                              nome_cliente=agendamento.nome_cliente, nome_pet=agendamento.nome_pet, 
-                                              valor_servico=agendamento.valor_servico, servico_id=agendamento.servico_id, 
-                                              servico_titulo='', cancelado=agendamento.eh_cancelado, 
-                                              data_inclusao=data_inclusao)
+        session = Session()
+        agendamento: Optional[AgendamentoServicoEntity] = session.get(AgendamentoServicoEntity, id)
+        if not agendamento:
             session.close()
-            return schema
-        except Exception as erro:
-            print(f'Erro ao buscar agendamento pelo id #{id}: {erro}')
-            return Optional()
+            raise AgendamentoNaoEncontradoException('Agendamento não encontrado!')
+        data_agendamento = datetime.strftime(agendamento.data_agendamento, DATETIME_FORMAT)
+        data_inclusao = datetime.strftime(agendamento.data_inclusao, DATETIME_FORMAT)
+        schema = AgendamentoServicoSchema(id=agendamento.id, data_agendamento=data_agendamento, 
+                                          nome_cliente=agendamento.nome_cliente, nome_pet=agendamento.nome_pet, 
+                                          valor_servico=agendamento.valor_servico, servico_id=agendamento.servico_id, 
+                                          servico_titulo='', cancelado=agendamento.eh_cancelado, 
+                                          data_inclusao=data_inclusao)
+        session.close()
+        return schema
+    
+    def __eh_exclusao_fora_do_prazo__(self, data_agendamento: datetime) -> bool:
+        """
+        Valida se é permitido exclusão do agendamento do serviço.
+        """
+        duracao = datetime.now() - data_agendamento
+        duracao_em_seg = duracao.total_seconds()
+        duracao_em_horas = divmod(duracao_em_seg, 3600)[0]
+        return duracao_em_horas < PRAZO_EXCLUSAO_EM_HORAS
+

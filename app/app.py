@@ -3,6 +3,7 @@ from flask import redirect, Response, request
 from urllib.parse import unquote
 from sqlalchemy.exc import IntegrityError
 from flask_cors import CORS
+from typing import Optional
 
 from app import *
 
@@ -71,14 +72,35 @@ def novo_agendamento(form: NovoAgendamentoServicoSchema):
         schema = ErroSchema(mensagem=mensagem_erro)
         return apresentar_erro(schema), 400
     
-@app.delete('/api/agendamento_servico', tags=[], 
-            responses={200: {}, 400: ErroSchema})
-def excluir_agendamento(form: ExcluirAgendamentoServicoSchema):
+@app.get('/api/agendamento_servico', tags=[], 
+         responses={200: AgendamentoServicoSchema, 400: ErroSchema, 404: ErroSchema})
+def busca_agendamento_por_id(form: AgendamentoServicoPorIdSchema):
     """
+    Busca agendamento por ID.
+    """
+    try:
+        agendamento: Optional[AgendamentoServicoSchema] = controller_agendamento.buscar_agendamento_por_id(form.id)
+        return apresenta_agendamento(agendamento), 200
+    except AgendamentoNaoEncontradoException:
+        schema = ErroSchema(mensagem='Agendamento não encontrado!')
+        return apresentar_erro(schema), 404
+    except Exception:
+        schema = ErroSchema(mensagem=f'Erro ao buscar agendamento pelo id {form.id}')
+        return apresentar_erro(schema), 400
+    
+@app.delete('/api/agendamento_servico', tags=[], 
+            responses={200: {}, 400: ErroSchema, 409: ErroSchema})
+def excluir_agendamento(form: AgendamentoServicoPorIdSchema):
+    """
+    Exclui um agendamento pelo ID.
     """
     try:
         controller_agendamento.excluir_agendamento_servico(form.id)
         return {}, 200
+    except ExclusaoAgendamentoForaDoHorarioPermitidoException:
+        motivo = 'Só é possível excluir um agendamento de serviço com 4h de antecedência. Tente cancelar o agendamento!'
+        schema = ErroSchema(mensagem=motivo)
+        return apresentar_erro(schema), 400
     except Exception as erro:
         print(erro)
         schema = ErroSchema(mensagem=f'Erro ao excluir agendamento de serviço!')
