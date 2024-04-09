@@ -1,1 +1,1 @@
-from .entities import BaseEntity, ServicoEntity
+from .entities import BaseEntity, ServicoEntity, AgendamentoServicoEntity
