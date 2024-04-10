@@ -83,7 +83,7 @@ class AgendamentoServicoController:
                    AgendamentoServicoEntity.data_agendamento <= data_hora_agendamento_fim). \
             all()
         
-        schemas = [self.__mapear_entity_para_schema__(agendamento) for agendamento in agendamentos]
+        schemas = [self.__mapear_entity_para_schema__(agendamento, self.__buscar_titulo_servico__(agendamento.servico_id)) for agendamento in agendamentos]
         session.close()
         return schemas
 
@@ -96,8 +96,8 @@ class AgendamentoServicoController:
         if not agendamento:
             session.close()
             raise AgendamentoNaoEncontradoException('Agendamento não encontrado!')
-        
-        schema = self.__mapear_entity_para_schema__(agendamento)
+        servico_titulo = self.__buscar_titulo_servico__(agendamento.servico_id)
+        schema = self.__mapear_entity_para_schema__(agendamento, servico_titulo)
         session.close()
         return schema
     
@@ -110,7 +110,7 @@ class AgendamentoServicoController:
         duracao_em_horas = divmod(duracao_em_seg, 3600)[0]
         return duracao_em_horas < PRAZO_EXCLUSAO_EM_HORAS
     
-    def __mapear_entity_para_schema__(self, agendamento: AgendamentoServicoEntity) -> AgendamentoServicoSchema:
+    def __mapear_entity_para_schema__(self, agendamento: AgendamentoServicoEntity, servico_titulo: str = '') -> AgendamentoServicoSchema:
         """
         Mapeia instancia de 'AgendamentoServicoEntity' para 'AgendamentoServicoSchema'.
         """
@@ -119,5 +119,18 @@ class AgendamentoServicoController:
         return AgendamentoServicoSchema(id=agendamento.id, data_agendamento=data_agendamento, 
                                         nome_cliente=agendamento.nome_cliente, nome_pet=agendamento.nome_pet, 
                                         valor_servico=agendamento.valor_servico, servico_id=agendamento.servico_id, 
-                                        servico_titulo='', cancelado=agendamento.eh_cancelado, 
+                                        servico_titulo=servico_titulo, cancelado=agendamento.eh_cancelado, 
                                         data_inclusao=data_inclusao)
+    
+    def __buscar_titulo_servico__(self, servico_id: int) -> str:
+        """
+        Busca título do serviço pelo seu id.
+        """
+        session = Session()
+        servico: Optional[ServicoEntity] = session.get(ServicoEntity, servico_id)
+        if not servico:
+            session.close()
+            return ''
+        servico_titulo = servico.titulo
+        session.close()
+        return servico_titulo
