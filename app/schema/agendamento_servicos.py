@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from .servicos import ServicosAtivosViewSchema
+from pydantic import BaseModel, RootModel
+from typing import List
 
 class NovoAgendamentoServicoSchema(BaseModel):
     """
@@ -50,6 +50,12 @@ class BuscaAgendaPorDataSchema(BaseModel):
     """
     data_inicio: str = '2024-04-22'
     data_fim: str = '2024-04-26'
+
+class AgendaSchema(RootModel):
+    """
+    Define o contrato de exibição da busca de agendamentos por data (BuscaAgendaPorDataSchema).
+    """
+    root: List[AgendamentoServicoSchema] = []
 
 def apresenta_agendamento(schema: AgendamentoServicoSchema) -> dict[str, any]:
     return {
