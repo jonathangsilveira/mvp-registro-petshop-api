@@ -11,11 +11,13 @@ info = Info(title="MVP Registro Petshop API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
 CORS(app)
 
-servico_tag = Tag(name='Serviço', description='Adição e visualização de serviços à base.')
-servico_ativo_tag = Tag(name='Serviços Ativo', description='Exibição de serviços ativos.')
+servico_tag = Tag(name='Serviço', 
+                  description='Adição e visualização de serviços à base.')
+agendamento_servico_tag = Tag(name='Agendamento de serviços', 
+                              description='Inclusão, alteração, exclusão e visualização de agendamentos de serviços do Petshop.')
 
 @app.route('/api')
-def documentation():
+def documentacao_swagger():
     """Redireciona para visualização do estilo de documentação Swagger.
     """
     return redirect('/openapi/swagger')
@@ -41,7 +43,7 @@ def adicionar_servico(form: NovoServicoSchema):
         print(f'{erro.mensagem}: {cause}')
         return apresentar_erro(erro), 400
     
-@app.get('/api/servico', tags=[servico_ativo_tag], 
+@app.get('/api/servico', tags=[servico_tag], 
          responses={200: ServicosAtivosViewSchema, 400: ErroSchema})
 def listar_servicos_ativos():
     try:
@@ -53,7 +55,7 @@ def listar_servicos_ativos():
         print(f'{erro.mensagem}: {cause}')
         return apresentar_erro(erro), 400
     
-@app.post('/api/agendamento_servico/novo', tags=[], 
+@app.post('/api/agendamento_servico/novo', tags=[agendamento_servico_tag], 
           responses={200: {}, 400: ErroSchema, 409: ErroSchema})
 def novo_agendamento(form: NovoAgendamentoServicoSchema):
     """
@@ -72,7 +74,7 @@ def novo_agendamento(form: NovoAgendamentoServicoSchema):
         schema = ErroSchema(mensagem=mensagem_erro)
         return apresentar_erro(schema), 400
     
-@app.get('/api/agendamento_servico', tags=[], 
+@app.get('/api/agendamento_servico', tags=[agendamento_servico_tag], 
          responses={200: AgendamentoServicoSchema, 400: ErroSchema, 404: ErroSchema})
 def busca_agendamento_por_id(form: AgendamentoServicoPorIdSchema):
     """
@@ -88,7 +90,7 @@ def busca_agendamento_por_id(form: AgendamentoServicoPorIdSchema):
         schema = ErroSchema(mensagem=f'Erro ao buscar agendamento pelo id {form.id}')
         return apresentar_erro(schema), 400
     
-@app.delete('/api/agendamento_servico', tags=[], 
+@app.delete('/api/agendamento_servico', tags=[agendamento_servico_tag], 
             responses={200: {}, 400: ErroSchema, 409: ErroSchema})
 def excluir_agendamento(form: AgendamentoServicoPorIdSchema):
     """
@@ -106,8 +108,8 @@ def excluir_agendamento(form: AgendamentoServicoPorIdSchema):
         schema = ErroSchema(mensagem=f'Erro ao excluir agendamento de serviço!')
         return apresentar_erro(schema), 400
     
-@app.get('/api/agenda_servicos', tags=[], 
-         responses={200: {}, 400: ErroSchema})
+@app.get('/api/agenda_servicos', tags=[agendamento_servico_tag], 
+         responses={200: AgendaSchema, 400: ErroSchema})
 def listar_agenda_servicos(form: BuscaAgendaPorDataSchema):
     """
     Lista a agenda de serviços dado período início e fim.
