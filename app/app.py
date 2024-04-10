@@ -109,16 +109,16 @@ def excluir_agendamento(form: AgendamentoServicoPorIdSchema):
         return apresentar_erro(schema), 400
     
 @app.get('/api/agenda_servicos', tags=[agendamento_servico_tag], 
-         responses={200: AgendaSchema, 400: ErroSchema})
-def listar_agenda_servicos(form: BuscaAgendaPorDataSchema):
+           responses={200: AgendaSchema, 400: ErroSchema})
+def listar_agenda_servicos(query: BuscaAgendaPorDataSchema):
     """
     Lista a agenda de serviços dado período início e fim.
     """
     try:
-        agendamentos = controller_agendamento.buscar_agendamentos_por_data(data_agendamento_inicio=form.data_inicio, data_agendamento_fim=form.data_fim)
+        agendamentos = controller_agendamento.buscar_agendamentos_por_data(data_agendamento_inicio=query.data_inicio, data_agendamento_fim=query.data_fim)
         return [apresenta_agendamento(agendamento) for agendamento in agendamentos], 200
     except Exception as erro:
         print(erro)
-        mensagem_erro = f'Erro listas agenda no período entre {form.data_inicio} e {form.data_fim}!'
+        mensagem_erro = f'Erro listas agenda no período entre {query.data_inicio} e {query.data_fim}!'
         schema = ErroSchema(mensagem=mensagem_erro)
         return apresentar_erro(schema), 400
