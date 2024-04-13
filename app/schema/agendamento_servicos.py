@@ -45,17 +45,11 @@ class NovoAgendamentoServicoSchema(BaseModel):
         return value
             
 
-class AlterarAgendamentoServicoSchema(BaseModel):
+class CancelarAgendamentoServicoSchema(BaseModel):
     """
     Define o contrato de alteração de um agendamento de serviço.
     """
     id: int
-    data_agendamento: str = '2024-04-08 20:34:00'
-    nome_cliente: str = 'Vitória Tenorio'
-    nome_pet: str = 'Cacau'
-    valor_servico: float = 50.0
-    servico_id: int = 1
-    cancelado: bool = False
 
 class AgendamentoServicoSchema(BaseModel):
     """

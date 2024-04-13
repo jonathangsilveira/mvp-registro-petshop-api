@@ -5,7 +5,7 @@ from app.database import Session
 
 from app.entity import ServicoEntity, AgendamentoServicoEntity
 
-from app.schema.agendamento_servicos import NovoAgendamentoServicoSchema, AlterarAgendamentoServicoSchema, AgendamentoServicoSchema
+from app.schema.agendamento_servicos import NovoAgendamentoServicoSchema, CancelarAgendamentoServicoSchema, AgendamentoServicoSchema
 
 from .excecoes import AgendamentoNaoEncontradoException, ExclusaoAgendamentoForaDoHorarioPermitidoException
 
@@ -31,21 +31,15 @@ class AgendamentoServicoController:
         session.commit()
         session.close() 
 
-    def alterar_agendamento_servico(self, schema: AlterarAgendamentoServicoSchema) -> None:
+    def cancelar_agendamento_servico(self, id: int) -> None:
         """
-        Altera um registro de agendamento de serviço.
+        Altera um registro de agendamento de serviço atribuindo flag de cancelado.
         """
         session = Session()
-        data_agendamento = para_data_hora_servidor(schema.data_agendamento)
-        agendamento: Optional[AgendamentoServicoEntity] = session.get(AgendamentoServicoEntity, schema.id)
+        agendamento: Optional[AgendamentoServicoEntity] = session.get(AgendamentoServicoEntity, id)
         if not agendamento:
             raise AgendamentoNaoEncontradoException('Agendamento não encontrado!')
-        agendamento.data_agendamento = data_agendamento
-        agendamento.eh_cancelado = schema.cancelado
-        agendamento.nome_cliente = schema.nome_cliente
-        agendamento.nome_pet = schema.nome_pet
-        agendamento.servico_id = schema.servico_id
-        agendamento.valor_servico = schema.valor_servico
+        agendamento.eh_cancelado = True
         session.commit()
         session.close()
 

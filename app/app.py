@@ -119,3 +119,19 @@ def listar_agenda_servicos(query: BuscaAgendaPorDataSchema):
         mensagem_erro = f'Erro listas agenda no período entre {query.data_inicio} e {query.data_fim}!'
         schema = ErroSchema(mensagem=mensagem_erro)
         return apresentar_erro(schema), 400
+    
+@app.post('/api/agendamento_servico/cancelar', tags=[agendamento_servico_tag], 
+          responses={200: {}, 400: ErroSchema})
+def cancelar_agendamento(query: CancelarAgendamentoServicoSchema):
+    """
+    Cancela agendamento de serviço. Esta operação apenas altera o agendamento para cancelado, 
+    não liberando o horário para outro serviço.
+    """
+    try:
+        controller_agendamento.cancelar_agendamento_servico(query.id)
+        return {}, 200
+    except Exception as erro:
+        print(erro)
+        mensagem_erro = f'Erro ao cancelar agendamento de serviço!'
+        schema = ErroSchema(mensagem=mensagem_erro)
+        return apresentar_erro(schema), 400
