@@ -35,12 +35,10 @@ def adicionar_servico(form: NovoServicoSchema):
     except IntegrityError as cause:
         erro = ErroSchema()
         erro.mensagem = f'Serviço "{form.titulo}" já cadastrado!'
-        print(f'{erro.mensagem}: {cause}')
         return apresentar_erro(erro), 409
     except Exception as cause:
         erro = ErroSchema()
         erro.mensagem = 'Erro ao adicionar novo serviço!'
-        print(f'{erro.mensagem}: {cause}')
         return apresentar_erro(erro), 400
     
 @app.get('/api/servico', tags=[servico_tag], 
@@ -52,7 +50,6 @@ def listar_servicos_ativos():
     except Exception as cause:
         erro = ErroSchema()
         erro.mensagem = 'Erro ao listar serviços ativos!'
-        print(f'{erro.mensagem}: {cause}')
         return apresentar_erro(erro), 400
     
 @app.post('/api/agendamento_servico/novo', tags=[agendamento_servico_tag], 
@@ -81,7 +78,7 @@ def busca_agendamento_por_id(form: AgendamentoServicoPorIdSchema):
     Busca agendamento por ID.
     """
     try:
-        agendamento: Optional[AgendamentoServicoSchema] = controller_agendamento.buscar_agendamento_por_id(form.id)
+        agendamento: AgendamentoServicoSchema = controller_agendamento.buscar_agendamento_por_id(form.id)
         return apresenta_agendamento(agendamento), 200
     except AgendamentoNaoEncontradoException:
         schema = ErroSchema(mensagem='Agendamento não encontrado!')
