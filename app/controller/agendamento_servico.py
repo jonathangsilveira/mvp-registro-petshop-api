@@ -105,10 +105,12 @@ class AgendamentoServicoController:
         """
         Valida se é permitido exclusão do agendamento do serviço.
         """
-        duracao = datetime.now() - data_agendamento
+        now = datetime.now()
+        print(f'{now} - {data_agendamento}')
+        duracao = now - data_agendamento
         duracao_em_seg = duracao.total_seconds()
         duracao_em_horas = divmod(duracao_em_seg, 3600)[0]
-        return duracao_em_horas < PRAZO_EXCLUSAO_EM_HORAS
+        return duracao_em_horas > 0 and duracao_em_horas < PRAZO_EXCLUSAO_EM_HORAS
     
     def __mapear_entity_para_schema__(self, agendamento: AgendamentoServicoEntity, servico_titulo: str = '') -> AgendamentoServicoSchema:
         """

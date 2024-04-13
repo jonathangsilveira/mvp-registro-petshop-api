@@ -92,12 +92,12 @@ def busca_agendamento_por_id(form: AgendamentoServicoPorIdSchema):
     
 @app.delete('/api/agendamento_servico', tags=[agendamento_servico_tag], 
             responses={200: {}, 400: ErroSchema, 409: ErroSchema})
-def excluir_agendamento(form: AgendamentoServicoPorIdSchema):
+def excluir_agendamento(query: AgendamentoServicoPorIdSchema):
     """
     Exclui um agendamento pelo ID.
     """
     try:
-        controller_agendamento.excluir_agendamento_servico(form.id)
+        controller_agendamento.excluir_agendamento_servico(query.id)
         return {}, 200
     except ExclusaoAgendamentoForaDoHorarioPermitidoException:
         motivo = 'Só é possível excluir um agendamento de serviço com 4h de antecedência. Tente cancelar o agendamento!'
