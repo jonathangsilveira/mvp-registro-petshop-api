@@ -73,18 +73,18 @@ def novo_agendamento(form: NovoAgendamentoServicoSchema):
     
 @app.get('/api/agendamento_servico', tags=[agendamento_servico_tag], 
          responses={200: AgendamentoServicoSchema, 400: ErroSchema, 404: ErroSchema})
-def busca_agendamento_por_id(form: AgendamentoServicoPorIdSchema):
+def busca_agendamento_por_id(query: AgendamentoServicoPorIdSchema):
     """
     Busca agendamento por ID.
     """
     try:
-        agendamento: AgendamentoServicoSchema = controller_agendamento.buscar_agendamento_por_id(form.id)
+        agendamento: AgendamentoServicoSchema = controller_agendamento.buscar_agendamento_por_id(query.id)
         return apresenta_agendamento(agendamento), 200
     except AgendamentoNaoEncontradoException:
         schema = ErroSchema(mensagem='Agendamento não encontrado!')
         return apresentar_erro(schema), 404
     except Exception:
-        schema = ErroSchema(mensagem=f'Erro ao buscar agendamento pelo id {form.id}')
+        schema = ErroSchema(mensagem=f'Erro ao buscar agendamento pelo id {query.id}')
         return apresentar_erro(schema), 400
     
 @app.delete('/api/agendamento_servico', tags=[agendamento_servico_tag], 
