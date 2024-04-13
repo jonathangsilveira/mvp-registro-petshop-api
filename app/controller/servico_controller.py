@@ -6,7 +6,7 @@ from app.schema.servicos import NovoServicoSchema, ServicoAtivoSchema
 
 class ServicoController:
     """
-    Objeto responsável por ...
+    Acessa as entidades para fornecer os dados para as rotas de serviços.
     """
 
     def adicionar_servico(self, schema: NovoServicoSchema) -> None:

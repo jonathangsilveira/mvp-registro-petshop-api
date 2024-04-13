@@ -31,6 +31,9 @@ def apresentar_servico_ativo(servico_ativo: ServicoAtivoSchema) -> dict[str, any
     }
 
 def apresentar_servicos_ativos(servicos_ativos: list[ServicoAtivoSchema]) -> list[dict[str, any]]:
+    """
+    Converte schema de serviços ativos para lista de dict.
+    """
     result: list[dict[str, any]] = []
     for servico_ativo in servicos_ativos:
         transformation = apresentar_servico_ativo(servico_ativo)

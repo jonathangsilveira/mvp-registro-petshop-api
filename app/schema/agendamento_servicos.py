@@ -91,6 +91,9 @@ class AgendaSchema(RootModel):
     root: List[AgendamentoServicoSchema] = []
 
 def apresenta_agendamento(schema: AgendamentoServicoSchema) -> dict[str, any]:
+    """
+    Converte schema de agendamento de serviço para dict.
+    """
     return {
         "id": schema.id,
         "data_agendamento": schema.data_agendamento,
