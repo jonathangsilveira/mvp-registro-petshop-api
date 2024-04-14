@@ -75,6 +75,7 @@ class AgendamentoServicoController:
         agendamentos = session.query(AgendamentoServicoEntity). \
             filter(AgendamentoServicoEntity.data_agendamento >= data_hora_agendamento_inicio, 
                    AgendamentoServicoEntity.data_agendamento <= data_hora_agendamento_fim). \
+            order_by(AgendamentoServicoEntity.data_agendamento). \
             all()
         
         schemas = [self.__mapear_entity_para_schema__(agendamento, self.__buscar_titulo_servico__(agendamento.servico_id)) for agendamento in agendamentos]
