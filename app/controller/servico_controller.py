@@ -2,23 +2,12 @@ from app.database import Session
 
 from app.entity import ServicoEntity
 
-from app.schema.servicos import NovoServicoSchema, ServicoAtivoSchema
+from app.schema.servicos import ServicoAtivoSchema
 
 class ServicoController:
     """
     Acessa as entidades para fornecer os dados para as rotas de serviços.
     """
-
-    def adicionar_servico(self, schema: NovoServicoSchema) -> None:
-        """
-        Adicionar um novo serviço na base de dados.
-        """
-        servico = ServicoEntity(titulo=schema.titulo, preco_unitario=schema.preco_unitario, 
-                                    eh_ativo=schema.eh_ativo)
-        session = Session()
-        session.add(servico)
-        session.commit()
-        session.close()
 
     def recuperar_servicos_ativos(self) -> list[ServicoAtivoSchema]:
         """

@@ -1,14 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
 
-class NovoServicoSchema(BaseModel):
-    """
-    Define contrato de como deve ser inserido um novo serviço.
-    """
-    titulo: str = "Tosa bebê"
-    preco_unitario: float = 75.0
-    eh_ativo: Optional[bool] = True
-
 class ServicoAtivoSchema(BaseModel):
     """
     Define contrato de como deve ser exibido o serviço.

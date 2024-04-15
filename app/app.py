@@ -22,25 +22,6 @@ def documentacao_swagger():
     """
     return redirect('/openapi/swagger')
 
-@app.post('/api/servico', tags=[servico_tag], 
-          responses={200: {}, 400: ErroSchema, 409: ErroSchema})
-def adicionar_servico(form: NovoServicoSchema):
-    """
-    Adicionar um novo serviço na base de dados.
-    """
-    try:
-        controller_servico.adicionar_servico(schema=form)
-        
-        return {}, 200
-    except IntegrityError as cause:
-        erro = ErroSchema()
-        erro.mensagem = f'Serviço "{form.titulo}" já cadastrado!'
-        return apresentar_erro(erro), 409
-    except Exception as cause:
-        erro = ErroSchema()
-        erro.mensagem = 'Erro ao adicionar novo serviço!'
-        return apresentar_erro(erro), 400
-    
 @app.get('/api/servico', tags=[servico_tag], 
          responses={200: ServicosAtivosViewSchema, 400: ErroSchema})
 def listar_servicos_ativos():
