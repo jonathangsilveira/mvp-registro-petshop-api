@@ -82,20 +82,6 @@ class AgendamentoServicoController:
         session.close()
         return schemas
 
-    def buscar_agendamento_por_id(self, id: int) -> AgendamentoServicoSchema:
-        """
-        Retorna o agendamento pelo seu id ou None caso não encontre.
-        """
-        session = Session()
-        agendamento: Optional[AgendamentoServicoEntity] = session.get(AgendamentoServicoEntity, id)
-        if not agendamento:
-            session.close()
-            raise AgendamentoNaoEncontradoException('Agendamento não encontrado!')
-        servico_titulo = self.__buscar_titulo_servico__(agendamento.servico_id)
-        schema = self.__mapear_entity_para_schema__(agendamento, servico_titulo)
-        session.close()
-        return schema
-    
     def __eh_exclusao_fora_do_prazo__(self, data_agendamento: datetime) -> bool:
         """
         Valida se é permitido exclusão do agendamento do serviço.
