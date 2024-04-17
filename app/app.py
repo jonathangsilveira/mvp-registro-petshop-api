@@ -22,25 +22,6 @@ def documentacao_swagger():
     """
     return redirect('/openapi/swagger')
 
-@app.post('/api/servico', tags=[servico_tag], 
-          responses={200: {}, 400: ErroSchema, 409: ErroSchema})
-def adicionar_servico(form: NovoServicoSchema):
-    """
-    Adicionar um novo serviço na base de dados.
-    """
-    try:
-        controller_servico.adicionar_servico(schema=form)
-        
-        return {}, 200
-    except IntegrityError as cause:
-        erro = ErroSchema()
-        erro.mensagem = f'Serviço "{form.titulo}" já cadastrado!'
-        return apresentar_erro(erro), 409
-    except Exception as cause:
-        erro = ErroSchema()
-        erro.mensagem = 'Erro ao adicionar novo serviço!'
-        return apresentar_erro(erro), 400
-    
 @app.get('/api/servico', tags=[servico_tag], 
          responses={200: ServicosAtivosViewSchema, 400: ErroSchema})
 def listar_servicos_ativos():
@@ -69,22 +50,6 @@ def novo_agendamento(form: NovoAgendamentoServicoSchema):
         print(erro)
         mensagem_erro = f'Erro ao agendar serviço para a data {form.data_agendamento}!'
         schema = ErroSchema(mensagem=mensagem_erro)
-        return apresentar_erro(schema), 400
-    
-@app.get('/api/agendamento_servico', tags=[agendamento_servico_tag], 
-         responses={200: AgendamentoServicoSchema, 400: ErroSchema, 404: ErroSchema})
-def busca_agendamento_por_id(query: AgendamentoServicoPorIdSchema):
-    """
-    Busca agendamento por ID.
-    """
-    try:
-        agendamento: AgendamentoServicoSchema = controller_agendamento.buscar_agendamento_por_id(query.id)
-        return apresenta_agendamento(agendamento), 200
-    except AgendamentoNaoEncontradoException:
-        schema = ErroSchema(mensagem='Agendamento não encontrado!')
-        return apresentar_erro(schema), 404
-    except Exception:
-        schema = ErroSchema(mensagem=f'Erro ao buscar agendamento pelo id {query.id}')
         return apresentar_erro(schema), 400
     
 @app.delete('/api/agendamento_servico', tags=[agendamento_servico_tag], 
